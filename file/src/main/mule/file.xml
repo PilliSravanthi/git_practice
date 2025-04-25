@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="94767f91-c394-4fd7-a368-4619aa6f4b4a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="a3abb675-4791-40d9-9ae7-07155e13a96c" />
+	<flow name="fileFlow" doc:id="22f8a0c6-bc50-479a-a671-60df4d58bee5" >
+		<http:listener doc:name="Listener" doc:id="86b773df-5fd3-4066-bca2-b2e625c7896f" config-ref="HTTP_Listener_config" path="/copy"/>
+		<file:copy doc:name="Copy" doc:id="c46ddbc0-159e-4ef6-9bcc-edd6d397ddf1" sourcePath="C:\File Operations\file read\fileReadData.json" targetPath="C:\File Operations\filecopy\file Copy.txt" overwrite="true"/>
+	</flow>
+	<flow name="fileFlow1" doc:id="e2fb5676-8dcf-4f6f-91af-603de6967c2c" >
+		<http:listener doc:name="Listener" doc:id="3514ca9e-78ec-47df-b870-839f2c08c68d" config-ref="HTTP_Listener_config" path="/move"/>
+		<file:move doc:name="Move" doc:id="cacf5566-f6ec-4e71-a725-1ae0508823c1" sourcePath="C:\File Operations\file read\fileReadData.json" targetPath="C:\File Operations\filemove" config-ref="File_Config"/>
+	</flow>
+	<flow name="fileFlow2" doc:id="81e9d83d-7298-446e-832e-a584564ef1d3" >
+		<http:listener doc:name="Listener" doc:id="6d512627-061f-4c78-adac-4992e1459910" config-ref="HTTP_Listener_config" path="/rename"/>
+		<file:rename doc:name="Rename" doc:id="1eac6547-2e02-46ee-ad95-9670007bcd45" path="C:\File Operations\file read" to="fileRead"/>
+	</flow>
+	<flow name="fileFlow3" doc:id="b6d7caa4-b994-45d1-ac42-6f2ee3660a94" >
+		<http:listener doc:name="Listener" doc:id="5d0c022f-ceaa-45fc-9892-48bfa96c90b4" config-ref="HTTP_Listener_config" path="/delete"/>
+		<file:delete doc:name="Delete" doc:id="cba7b1aa-ecce-4fe6-a426-9152f344f138" path="C:\File Operations\filemove\fileReadData.json"/>
+	</flow>
+	<flow name="fileFlow5" doc:id="81147e15-b46f-45f0-984b-9f1a8cf9b5d7" >
+		<file:listener doc:name="On New or Updated File" doc:id="e1fe1f4b-c78b-4971-affa-f4ab5bbf480d" config-ref="File_Config" directory="C:\Users\Admin\Desktop\OnNewFile">
+			<scheduling-strategy >
+				<fixed-frequency timeUnit="SECONDS" frequency="5"/>
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="38ae8776-1429-43b1-9114-53ccfb80b823" message="#[payload]"/>
+	</flow>
+	<flow name="fileFlow4" doc:id="88133bc0-611f-4cc9-9209-39f22a6cba89" >
+		<http:listener doc:name="Listener" doc:id="c1b1549e-e9fc-45fc-8b89-448420c45462" config-ref="HTTP_Listener_config" path="/list"/>
+		<file:list doc:name="List" doc:id="9562a5ef-c8e7-4afe-b9e6-71717db6b927" config-ref="File_Config" directoryPath="C:\File Operations"/>
+		<ee:transform doc:name="Transform Message" doc:id="95869301-3697-4e70-a983-9ac895169397">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.attributes.fileName]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2f1c8712-01f8-4f75-ab87-ef2ea58bc73b" message="#[payload]"/>
+	</flow>
+</mule>
